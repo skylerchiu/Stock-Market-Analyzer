@@ -14,7 +14,7 @@ https://colab.research.google.com/drive/19cOocT_W4YoNiqa9ZBC2TMKdjY-YG6vq?usp=sh
   * Price prediction for one day in the future based on hisotrical data and patterns in stock movement
  
  ## Technologies
- * Python and Python libraries including:
+* Python and Python libraries including:
   * NumPy
   * PyPlot
   * Pandas datareader
