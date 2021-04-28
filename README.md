@@ -8,9 +8,8 @@ https://colab.research.google.com/drive/19cOocT_W4YoNiqa9ZBC2TMKdjY-YG6vq?usp=sh
 ----
 
 * Features and Sections:
-  * Portfolio viewer, with all necessary information like 52-week highs/lows, EPS, Markt Cap, etc.
-  * Individidual equity intraday prices and graphs
-  * Closing price history visualizations with line and candlestick graphs
+  * Portfolio viewer, with all necessary information like  highs/lows, EPS, Market Cap, etc.
+  * Pivot point indicator
   * Price prediction for one day in the future based on hisotrical data and patterns in stock movement
  
  ## Technologies
@@ -19,7 +18,7 @@ https://colab.research.google.com/drive/19cOocT_W4YoNiqa9ZBC2TMKdjY-YG6vq?usp=sh
   * PyPlot
   * Pandas datareader
   * yFinance
-  * Sklearn preprocessing
+  * mplFinance
   
   
   
