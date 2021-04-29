@@ -1,12 +1,4 @@
-
-"""The Stock 'Em Robot
-
-Original file is located at
-    https://colab.research.google.com/drive/19cOocT_W4YoNiqa9ZBC2TMKdjY-YG6vq
-"""
-
-#Uses recurrent neural networks and tensorflow to predict a future
-
+#@title Run This Line To Activate Program
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -15,6 +7,9 @@ import datetime as dt
 from pandas_datareader.data import get_quote_yahoo
 import yfinance as yf
 from pandas_datareader import data as pdr
+# %matplotlib inline
+import mplfinance as mpf
+from mpl_finance import candlestick_ohlc 
 
 
 
@@ -22,142 +17,346 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM
 
-#@title  { display-mode: "form" }
+# if error shows yfinance not installed, run: pip install yfinance
+# if error shows mplfinance not installed,  run: pip install mplfinance
+# if error shows mpl_finance not installed, run: pip install mpl_finance
+
+pip install yfinance
+
+pip install mpl_finance
+
+pip install mplfinance
+
+"""# Personal Tickers"""
+
+#@title Personal Portfolio Daily Summary{ vertical-output: true }
+##Run to see data
+
+stocks = ['SPY','AAPL', 'AC.TO', 'TSLA', "LSPD.TO", 'MSFT', 'TD.TO', 'HIVE.V']
+
+date = dt.datetime.now()
+
+print("Daily Summary for " +str(date))
+print()
+print()
+
+for x in stocks:
+  print(x)
+  print("-------------------------------")
+  print("Current Price: $", get_quote_yahoo(x).price[0], get_quote_yahoo(x).financialCurrency[0])
+  print("Intraday change:", round(get_quote_yahoo(x).regularMarketChange[0], 2), " , ", round(get_quote_yahoo(x).regularMarketChangePercent[0], 2), "%")
+  print(" ")
+  print("Open: $", get_quote_yahoo(x).regularMarketOpen[0])
+  print("Daily High: $", get_quote_yahoo(x).regularMarketDayHigh[0])
+  print("Daily Low: $", get_quote_yahoo(x).	regularMarketDayLow[0])
+  print("Volume:", get_quote_yahoo(x).regularMarketVolume[0])
+  print(" ")
+  print(" ")
+  print(" ")
+
+#@title  SPY
+get_quote_yahoo('SPY')
+
+#@title  AAPL
 get_quote_yahoo('AAPL')
 
-#@title
-get_quote_yahoo('AMC')
-
-#@title
-get_quote_yahoo('LSPD.TO')
-
-#@title
+#@title TSLA
 get_quote_yahoo('TSLA')
 
-#@title
-get_quote_yahoo('NOK')
+#@title LSPD.TO
+get_quote_yahoo('LSPD.TO')
 
-#@title
+#@title AC.TO
+get_quote_yahoo('AC.TO')
+
+#@title MSFT
+get_quote_yahoo('MSFT')
+
+#@title  TD.TO
+get_quote_yahoo('TD.TO')
+
+#@title HIVE.V
 get_quote_yahoo('HIVE.V')
 
-#Select company name
-company = 'AAPL'
+"""# Custom Stock Data and Visualizers"""
 
+#@title Stock Data for the Last 10 Minutes
+company = input("Enter the stock symbol : ") 
 print(company)
 intraday_data = yf.download(tickers=company, #period: The number of days/month of data required. The valid frequencies are 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
  period="1d",
- interval="30m") #interval: The frequency of data. The valid intervals are 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo ,
+ interval="1m") #interval: The frequency of data. The valid intervals are 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo ,
 pd.set_option("max_rows", None)
-intraday_data.head(18)
+intraday_data.tail(10)
 
-intraday_data_graph = yf.download(tickers=company, #period: The number of days/month of data required. The valid frequencies are 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
+# Commented out IPython magic to ensure Python compatibility.
+#@title Intraday Chart
+# %matplotlib inline
+import mplfinance as mpf
+
+
+company = input("Enter the stock symbol: ")
+
+intraday_data = yf.download(tickers=company, #period: The number of days/month of data required. The valid frequencies are 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
  period="1d",
- interval="1m", auto_adjust=True)
-intraday_data_graph.shape
-plt.figure(figsize = (16,8))
-plt.title('Intraday Graph', fontsize = 24)
-plt.plot(intraday_data_graph['Close'])
-plt.xlabel('Time', fontsize = 18)
-plt.ylabel('Closing Price (USD)', fontsize = 18)
-plt.show()
+ interval="1m")
 
+
+graph_title = company + " Intraday Graph"
+Graph_Type = 'candle' #@param ["line", "candle"] {allow-input: true}
+
+mpf.plot(intraday_data,type = Graph_Type, figratio = (2,1),
+         title = graph_title , mav = (10), volume = True, 
+         style = 'charles')
+
+#@title Specific Time Period Chart
+
+company = input("Enter the stock symbol: ")
+data = web.DataReader(company, data_source ='yahoo', start = '2012-01-17', end =dt.datetime.now() )
+Graph_Type = 'candle' #@param ["line", "candle"] {allow-input: true}
+start_date = '2020-10-10' #@param {type:"date"}
+end = '2021-04-17' #@param {type:"date"}
+graph_title = company + " " +start_date + " - Present"
+mpf.plot(data[start_date : end],type = Graph_Type, figratio = (7,3),
+         title = graph_title , mav = (2), volume = True, 
+         style = 'charles')
+
+#@title Closing Price History
 #Select date to represent on graph
-data = web.DataReader(company, data_source ='yahoo', start = '2012-01-17', end = '2022-01-01')
+company = input("Enter the stock symbol: ")
+data = web.DataReader(company, data_source ='yahoo', start = '2007-01-01', end =dt.datetime.now() )
 
 data.shape
 plt.figure(figsize = (16,8))
-plt.title('Close Price History', fontsize = 24)
+plt.title(company +' Close Price History', fontsize = 24)
 plt.plot(data['Close'])
 plt.xlabel('Date', fontsize = 18)
 plt.ylabel('Closing Price (USD)', fontsize = 18)
+
 plt.show()
 
-'''
-#Candle stick graph
-import plotly.graph_objects as go
+"""# Indicators and Analysis Charts"""
+
+#@title Pivot point and Resistance indicator (Year to Date)
+
+start_resistance = dt.datetime(2021,1,1)
+now = dt.datetime.now()
+stock = input("Enter the stock symbol: ")
+
+df = pdr.get_data_yahoo(stock, start_resistance, now)
+
+df["Close"].plot(Label = "CLosing Price")
+
+pivots=[]
+dates = [] #stores dates of pivots
+counter = 0 #counts number of days since last pivot
+lastPivot = 0 #Stores last Pivot value
+
+Range = [0,0,0,0,0,0,0,0,0,0]
+dateRange = [0,0,0,0,0,0,0,0,0,0]
+
+for i in df.index:
+  currentMax = max(Range, default = 0)
+  value = round(df["Close"][i],2)
+
+  Range = Range[1:9]
+  Range.append(value)
+  dateRange = dateRange[1:9]
+  dateRange.append(i)
+
+  if currentMax == max(Range, default = 0):
+    counter += 1
+  else:
+    counter = 0
+  if counter == 5:
+    lastPivot = currentMax
+    dateloc = Range.index(lastPivot)
+    lastDate = dateRange[dateloc]
+
+    pivots.append(lastPivot)
+    dates.append(lastDate)
+
+pivot_high_1=df['High'][-21:-1].max()
+pivot_low_1=df['High'][-21:-1].min()
+
+print()
+numer_of_days_the_resistance_should_hold = 30
+timeD = dt.timedelta(days = numer_of_days_the_resistance_should_hold) #determines how many days to draw pivot point for
+
+for index in range(len(pivots)):
+  plt.plot_date([dates[index], dates[index]+ timeD],
+    [pivots[index], pivots[index]], linestyle = "-", linewidth = 2, marker = ",")
+  
 
 
+print("Notable Pivot Points: ")
+for index in range(len(pivots)):
+  print("$" + str(pivots[index])+" on " + str(dates[index]))
+print()
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
+rounded_pivot_high_1 = round(pivot_high_1, 2)
+rounded_pivot_low_1 = round(pivot_low_1, 2)
+print("Major Support at: $" + str(rounded_pivot_low_1))
+print("Major Resistance at: $" + str(rounded_pivot_high_1))
+print()
 
-fig = go.Figure(data=[go.Candlestick(x=df['Date'],
-                open=df['AAPL.Open'],
-                high=df['AAPL.High'],
-                low=df['AAPL.Low'],
-                close=df['AAPL.Close'])])
 
-fig.show()'''
-
-#Prepares and scales data
-scaler = MinMaxScaler(feature_range = (0,1))
-scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1,1))
-
-prediction_days = 60
-
-x_train = []
-y_train = []
-
-for x in range(prediction_days, len(scaled_data)):
-  x_train.append(scaled_data[x-prediction_days:x, 0])
-  y_train.append(scaled_data[x,0])
-
-x_train, y_train = np.array(x_train), np.array(y_train)
-x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1],1))
-
-#Builds the Model
-model = Sequential() #Calls Squential method
-
-model.add(LSTM(units = 50, return_sequences = True, input_shape=(x_train.shape[1],1)))
-model.add(Dropout(0.2))
-model.add(LSTM(units=50, return_sequences = True))
-model.add (Dropout(0.2))
-model.add(LSTM(units=50))
-model.add(Dropout(0.2))
-model.add(Dense(units=1)) #Prediction of next closing price
-
-model.compile (optimizer = 'adam',loss = 'mean_squared_error')
-model.fit(x_train, y_train, epochs=50, batch_size = 150) #Epcohs are how many times you go through your training set. Base =25 batch size =32
-
-#Test the model accuracy on existing data
-test_start = dt.datetime(2021,2,25) #For more stable stocks, choose a start date further in the past. For volitile stocks, select a start date a week or two prior
-test_end = dt.datetime.now() 
-
-test_data = web.DataReader(company,'yahoo',test_start, test_end)
-actual_prices = test_data['Close'].values
-
-total_dataset = pd.concat((data["Close"], test_data['Close']), axis = 0)
-
-model_inputs = total_dataset[len(total_dataset) - len(test_data) - prediction_days:].values
-model_inputs = model_inputs.reshape(-1,1)
-model_inputs = scaler.transform(model_inputs)
-
-#Makes preditions on data
-
-x_test = []
-
-for x in range(prediction_days, len(model_inputs)):
-  x_test.append(model_inputs[x-prediction_days:x, 0])
-
-x_test=np.array(x_test)
-x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
-
-predicted_prices = model.predict(x_test)
-predicted_prices = scaler.inverse_transform(predicted_prices) #reverses scaling
-
-plt.plot(actual_prices, color = "black", label = f"Actual")
-plt.plot(predicted_prices, color = "green", label = f"Prediction")
-plt.title(f"{company} Share Price")
-plt.xlabel('Number of Days Past Start Date')
-plt.ylabel(f'{company} Share Price')
+plt.title(stock + " Pivot Point Indicator")
+plt.ylabel("Price")
+plt.axhline(y = pivot_low_1, color = 'g', linewidth = 5, linestyle = '-', alpha=0.2, label = "Support Line")
+plt.axhline(y = pivot_high_1, color = 'r', linewidth = 5, linestyle = '-', alpha=0.2, label = "Resistance Line")
+plt.rcParams['figure.dpi'] = 150
 plt.legend()
 plt.show()
+print()
 
-#Predicting one day into the future
-real_data = [model_inputs[len(model_inputs) + 1 - prediction_days:len(model_inputs+1),0]]
-real_data = np.array(real_data)
-real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1],1))
+#@title Simple Moving Averages and Bollinger Bands Indicator
+#import relevant libraries
+import yfinance as yf
+import datetime as dt
+import pandas as pd
+from pandas_datareader import data as pdr
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
+import datetime as datetime
+import numpy as np
+from mpl_finance import candlestick_ohlc
+yf.pdr_override() #activate yahoo finance workaround
 
-prediction = model.predict(real_data)
-prediction = scaler.inverse_transform(prediction)
-print ("The projected price for ",company, " for tomorrow is approximately:")
-print(prediction)
+smasUsed = [10,20,50] #choose simply moving average over these day ranges
+#@markdown Starting Date:
+year = 2021# @param {type:"integer"}
+month = 1 #@param {type:"integer"}
+day = 1#@param {type:"integer"}
+start = dt.datetime(year,month,day) - dt.timedelta(days = max(smasUsed)) #Sets starting point of dataframe
+now = dt.datetime.now() #Sets end point of dataframe to present day
+stock = input("Enter the stock symbol: ")
+
+prices = pdr.get_data_yahoo (stock, start, now)
+fig, ax1 = plt.subplots() 
+
+#Calculate moving average
+for x in smasUsed:
+  sma = x
+  prices['SMA_' + str(sma)] = prices.iloc[:,4].rolling(window=sma).mean() #calculates sma and creates col, storing under SMA_*sma value*
+
+#Calculate Bollinger Bands. The Bollinger bands will be 2 standard deviations above, and 2 standard deviations below the SMA. The price is likely to revert into the Bollinger Bands if it were to exit
+BBperiod = 15 #choose moving average period
+stdev = 2 #Choose standard deviations
+prices['SMA' + str(BBperiod)] = prices.iloc[:,4].rolling(window=BBperiod).mean() #calculates standard deviation
+prices['STDEV'] = prices.iloc[:,4].rolling(window = BBperiod).std()
+prices['LowerBand'] = prices['SMA' +str(BBperiod)] - (stdev*prices['STDEV'])
+prices['UpperBand'] = prices['SMA' +str(BBperiod)] + (stdev*prices['STDEV'])
+prices["Date"] = mdates.date2num(prices.index) #converts time stamp to number
+
+#Calculate 10.4.4 stochastic.
+
+Period = 10
+K = 4
+D = 4
+
+prices["RolHigh"] = prices["High"].rolling(window=Period).max() #Finds High of period
+prices["RolLow"] = prices["Low"].rolling(window = Period).min() #Finds Low of period
+prices["stok"] = ((prices["Adj Close"] - prices["RolLow"])/(prices["RolHigh"] - prices["RolLow"]))*100
+prices["K"] = prices["stok"].rolling(window=K).mean()
+prices["D"] = prices["K"].rolling(window=D).mean()
+prices["GD"] = prices["High"]
+ohlc = []
+
+prices = prices.iloc[max(smasUsed):]
+
+greenDotDate = []
+greenDot = []
+lastK = 0
+lastD = 0
+lastLow = 0
+lastClose = 0
+lastLowBB=0
+
+for i in prices.index:
+  append_me = prices["Date"][i], prices["Open"][i], prices["High"][i], prices["Low"][i], prices["Adj Close"][i], prices["Volume"][i]
+  ohlc.append(append_me)
+
+    #Check for Green Dot
+  if prices['K'][i]>prices['D'][i] and lastK<lastD and lastK <60:
+    plt.plot(prices["Date"][i],prices["High"][i]+1, marker="o", ms=4, ls="", color='g') #plot green dot
+
+    greenDotDate.append(i) #store green dot date
+    greenDot.append(prices["High"][i])  #store green dot value
+
+    #Check for Lower Bollinger Band Bounce
+  if ((lastLow<lastLowBB) or (prices['Low'][i]<prices['LowerBand'][i])) and (prices['Adj Close'][i]>lastClose and prices['Adj Close'][i]>prices['LowerBand'][i]) and lastK <60:  
+    plt.plot(prices["Date"][i],prices["Low"][i]-1, marker="o", ms=4, ls="", color='b') #plot blue dot
+ 
+  #store values
+  lastK=prices['K'][i]
+  lastD=prices['D'][i]
+  lastLow=prices['Low'][i]
+  lastClose=prices['Adj Close'][i]
+  lastLowBB=prices['LowerBand'][i]
+
+
+
+
+for x in smasUsed:
+  sma = x
+  prices['SMA_' + str(sma)].plot(label = str(x) +' day moving average')
+prices['UpperBand'].plot(label = 'Upper Bollinger Band', color = 'lightgray')
+prices['LowerBand'].plot(label = 'Lower Bollinger Band', color = 'lightgray')
+
+#plot candlesticks
+candlestick_ohlc(ax1, ohlc, width = 0.5, colorup = 'g', colordown='r', alpha=0.75)
+
+ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+ax1.yaxis.set_major_locator(mticker.MaxNLocator(8))
+plt.tick_params(axis = 'x', rotation = 45)
+
+
+pivots=[]
+dates = [] #stores dates of pivots
+counter = 0 #counts number of days since last pivot
+lastPivot = 0 #Stores last Pivot value
+
+Range = [0,0,0,0,0,0,0,0,0,0]
+dateRange = [0,0,0,0,0,0,0,0,0,0]
+
+for i in prices.index:
+  currentMax = max(Range, default = 0)
+  value = round(prices["High"][i],2)
+
+  Range = Range[1:9]
+  Range.append(value)
+  dateRange = dateRange[1:9]
+  dateRange.append(i)
+
+  if currentMax == max(Range, default = 0):
+    counter += 1
+  else:
+    counter = 0
+  if counter == 5:
+    lastPivot = currentMax
+    dateloc = Range.index(lastPivot)
+    lastDate = dateRange[dateloc]
+
+    pivots.append(currentMax)
+    dates.append(lastDate)
+
+print()
+numer_of_days_the_resistanct_should_hold = 30
+timeD = dt.timedelta(days = numer_of_days_the_resistanct_should_hold) #determines how many days to draw pivot point for
+
+for index in range(len(pivots)):
+  plt.plot_date([dates[index]-(timeD*.075), dates[index]+ timeD],
+    [pivots[index], pivots[index]], linestyle = "--", linewidth = 1, marker = ",")
+  plt.annotate(str(pivots[index]), (mdates.date2num(dates[index]), pivots[index]), xytext = (-10,7),
+                   textcoords = 'offset points', fontsize = 7, arrowprops = dict(arrowstyle = '-|>'))
+plt.xlabel('Date')
+plt.ylabel("Price")
+plt.title(stock)
+plt.ylim(prices["Low"].min(), prices["High"].max()*1.05)
+plt.rcParams['figure.dpi'] = 200
+plt.autoscale()
+plt.tight_layout()
+plt.legend( prop={'size': 6})
+plt.show()
